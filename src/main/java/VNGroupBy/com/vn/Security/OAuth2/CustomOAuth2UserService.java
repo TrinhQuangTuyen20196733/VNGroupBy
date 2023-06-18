@@ -1,12 +1,15 @@
 package VNGroupBy.com.vn.Security.OAuth2;
 
+import VNGroupBy.com.vn.Entity.RoleEntity;
 import VNGroupBy.com.vn.Entity.UserEntity;
 import VNGroupBy.com.vn.Exception.OAuth2AuthenticationProcessingException;
+import VNGroupBy.com.vn.Repository.RoleRepository;
 import VNGroupBy.com.vn.Repository.UserRepository;
 import VNGroupBy.com.vn.Security.OAuth2.UserOAuth2.OAuth2UserInfo;
 import VNGroupBy.com.vn.Security.OAuth2.UserOAuth2.OAuth2UserInfoFactory;
 import VNGroupBy.com.vn.Security.UserPrincipal;
 import VNGroupBy.com.vn.SocialMedia.Model.AuthProvider;
+import VNGroupBy.com.vn.Utils.Caches.MyCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -18,13 +21,22 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-
     @Autowired
-    private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final MyCache myCache;
+
+    public CustomOAuth2UserService(UserRepository userRepository, MyCache myCache) {
+        this.userRepository = userRepository;
+        this.myCache = myCache;
+    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -43,22 +55,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
-        if(ObjectUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+        if (ObjectUtils.isEmpty(oAuth2UserInfo.getEmail())) {
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
         }
 
         Optional<UserEntity> userOptional = Optional.ofNullable(userRepository.findByEmail(oAuth2UserInfo.getEmail()));
         UserEntity user;
-        if(userOptional.isPresent()) {
+        if (userOptional.isPresent()) {
             user = userOptional.get();
-            if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
+            if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
                 throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
             user = updateExistingUser(user, oAuth2UserInfo);
+            myCache.updateCache(user.getEmail(), user);
+
         } else {
             user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
+            myCache.saveToCache(user.getEmail(), user);
         }
 
         return UserPrincipal.create(user, oAuth2User.getAttributes());
@@ -73,6 +88,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         user.setEmail(oAuth2UserInfo.getEmail());
         user.setImageUrl(oAuth2UserInfo.getImageUrl());
         user.setOauth2Account(true);
+        RoleEntity role = roleRepository.findByCode("USER").orElse(null);
+
+        user.setRole(role);
         return userRepository.save(user);
     }
 

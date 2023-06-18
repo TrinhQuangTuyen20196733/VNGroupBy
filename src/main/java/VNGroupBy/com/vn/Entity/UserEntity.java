@@ -18,8 +18,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "user", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email"),
-        @UniqueConstraint(columnNames = "userName")
+        @UniqueConstraint(columnNames = "email")
 })
 @Data
 @AllArgsConstructor
@@ -37,9 +36,6 @@ public class UserEntity extends  BaseEntity {
     @Column(name = "imageUrl")
     private String imageUrl;
 
-
-    @Column(name = "userName")
-    private String userName;
 
     @Column(name = "password")
     private String password;
@@ -68,20 +64,9 @@ public class UserEntity extends  BaseEntity {
     @Column(name = "birthday")
     private Date birthDay;
 
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
-    @JoinTable(
-            name = "account_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns  = @JoinColumn(name="role_id")
-
-    )
-    private List<RoleEntity> roles = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_code")
+    private RoleEntity role;
 
 }
 

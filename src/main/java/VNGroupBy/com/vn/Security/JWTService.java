@@ -24,6 +24,17 @@ public class JWTService {
                 .signWith(Keys.hmacShaKeyFor(SecurityConstant.SECRET_KEY.getBytes()),SignatureAlgorithm.HS512)
                 .compact();
     }
+    public String generateToken(Long UserId){
+        Date now =new Date();
+        Date expiratedDate = new Date(now.getTime()+SecurityConstant.EXPIRATION_TIME);
+        // create json web token from account ID - this is JWT signature
+        return Jwts.builder()
+                .setSubject(Long.toString(UserId))
+                .setIssuedAt(now)
+                .setExpiration(expiratedDate)
+                .signWith(Keys.hmacShaKeyFor(SecurityConstant.SECRET_KEY.getBytes()),SignatureAlgorithm.HS512)
+                .compact();
+    }
     // Get account information from jwt
     public int getUserIdFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()// create parserBuilder object  to decoder

@@ -24,7 +24,7 @@ public class UserDetailsService implements org.springframework.security.core.use
     }
 
     @Transactional
-    public org.springframework.security.core.userdetails.UserDetails loadUserById(int id) {
+    public org.springframework.security.core.userdetails.UserDetails loadUserById(Long id) {
         var user = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("User can not found with id : " + id)
         );

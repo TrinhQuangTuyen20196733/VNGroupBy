@@ -1,9 +1,13 @@
 package VNGroupBy.com.vn.Controller;
 
-import VNGroupBy.com.vn.DTO.ConfirmOTP;
-import VNGroupBy.com.vn.DTO.RegisterDTO;
-import VNGroupBy.com.vn.Service.EmailService;
-import VNGroupBy.com.vn.Service.OTPService;
+import VNGroupBy.com.vn.DTO.request.ConfirmOTP;
+import VNGroupBy.com.vn.DTO.response.MessagesResponse;
+import VNGroupBy.com.vn.DTO.request.RegisterReq;
+import VNGroupBy.com.vn.Entity.UserEntity;
+import VNGroupBy.com.vn.Service.Impl.EmailService;
+import VNGroupBy.com.vn.Service.Impl.OTPService;
+import VNGroupBy.com.vn.Service.UserService;
+import VNGroupBy.com.vn.Utils.Caches.MyCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,52 +17,78 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/register")
 public class RegisterController {
     @Autowired
+    UserService userService;
+    @Autowired
     OTPService otpService;
     @Autowired
     EmailService emailService;
+    @Autowired
+    MyCache myCache;
 
     @PostMapping ("/generateOtp")
-    public ResponseEntity<String> generateOTP(@RequestBody RegisterDTO registerDTO) {
-
-        String userName = registerDTO.getUserName();
-        int otp = otpService.generateOTP(userName);
+    public MessagesResponse generateOTP(@RequestBody RegisterReq registerReq) {
+        MessagesResponse ms = new MessagesResponse();
+        ms.message="Sent";
+        String email = registerReq.getEmail();
+        int otp = otpService.generateOTP(email);
         //Generate The Template to send OTP
 
         String message = "Your OTP verified number of VNGRoupBy is: " + otp;
         try {
-            emailService.sendOtpMessage(registerDTO.getEmail(), "OTP VNGroupBy verified code", message);
+            if (myCache.getFromCache(registerReq.getEmail())!=null) {
+                ms.code = 404;
+                ms.message = "Your email has been used!";
+            } else {
+                myCache.saveToCache(registerReq.getEmail(),registerReq);
+            }
+            emailService.sendOtpMessage(registerReq.getEmail(), "OTP VNGroupBy verified code", message);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
+            ms.code=HttpStatus.NOT_ACCEPTABLE.value();
+            ms.message=e.getMessage();
+
         }
 
 
-        return ResponseEntity.status(HttpStatus.OK).body("Sent");
+        return ms;
     }
 
     @PostMapping("/validateOtp")
-    public ResponseEntity<String> validateOtp(@RequestBody  ConfirmOTP confirmOTP) {
+    public MessagesResponse validateOtp(@RequestBody  ConfirmOTP confirmOTP) {
 
-        final String SUCCESS = "Entered Otp is valid";
+        final String SUCCESS = "Register Successfully!";
         final String FAIL = "Entered Otp is NOT valid. Please Retry!";
-        String username = confirmOTP.getUserName();
+        MessagesResponse ms = new MessagesResponse();
+        ms.message=SUCCESS;
+        String email = confirmOTP.getEmail();
+        RegisterReq registerReq = (RegisterReq) myCache.getFromCache(email);
+        myCache.deleteFromCache(email);
         int otpnum = confirmOTP.getOtpNum();
         //Validate the Otp
         if (otpnum >= 0) {
 
-            int serverOtp = otpService.getOtp(username);
+            int serverOtp = otpService.getOtp(email);
             if (serverOtp > 0) {
                 if (otpnum == serverOtp) {
-                    otpService.clearOTP(username);
+                    otpService.clearOTP(email);
+                    //Save Account
 
-                    return ResponseEntity.status(HttpStatus.OK).body(SUCCESS);
+                    UserEntity user = userService.create(registerReq);
+                    myCache.updateCache(email, user);
+
                 } else {
-                    return ResponseEntity.status(HttpStatus.OK).body(FAIL);
+
+                   ms.code=HttpStatus.UNAUTHORIZED.value();
+                   ms.message=FAIL;
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.OK).body(FAIL);
+                ms.code=HttpStatus.UNAUTHORIZED.value();
+                ms.message=FAIL;
             }
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body(FAIL);
+            ms.code=HttpStatus.UNAUTHORIZED.value();
+            ms.message=FAIL;
         }
-    }
+        return ms;
+    };
+
 }

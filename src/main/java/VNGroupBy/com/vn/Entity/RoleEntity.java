@@ -13,22 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "role")
-public class RoleEntity extends BaseEntity {
+public class RoleEntity {
     @Column(name = "name")
     private String name;
-    @Column(name = "code",unique = true)
-    private String code;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "roles",
-            fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.DETACH,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH,
-                    CascadeType.PERSIST
-            })
-    private List<UserEntity> users;
+    @Id
+    @Column(name = "code")
+    private String code;
 
     @Override
     public String toString() {

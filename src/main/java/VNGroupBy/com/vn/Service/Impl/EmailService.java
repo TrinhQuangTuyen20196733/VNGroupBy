@@ -1,4 +1,4 @@
-package VNGroupBy.com.vn.Service;
+package VNGroupBy.com.vn.Service.Impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

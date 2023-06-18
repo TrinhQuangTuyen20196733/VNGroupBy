@@ -1,4 +1,4 @@
-package VNGroupBy.com.vn.DTO;
+package VNGroupBy.com.vn.DTO.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfirmOTP {
-    private String userName;
+    private String email;
     private int otpNum;
 }

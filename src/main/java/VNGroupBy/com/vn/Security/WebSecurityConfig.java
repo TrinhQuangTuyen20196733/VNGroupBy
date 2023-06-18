@@ -67,6 +67,8 @@ public class WebSecurityConfig  {
     public SecurityFilterChain filterChainOAuth2(HttpSecurity http) throws Exception {
         http.csrf()
                 .disable()
+                .anonymous()
+                .disable()
 
                 .authorizeHttpRequests()
                 .requestMatchers("/OAuth2/**")
@@ -105,12 +107,15 @@ public class WebSecurityConfig  {
     public SecurityFilterChain filterChainJWT(HttpSecurity http) throws Exception {
         http.csrf()
                 .disable()
+                .anonymous()
+                .disable()
                 .authorizeHttpRequests()
-           /*     .requestMatchers("/OAuth2/**").denyAll()*/
-                .requestMatchers("/register/**")
+                /*.requestMatchers("/OAuth2/**").denyAll()*/
+                .requestMatchers("/register/**","/Auth/**")
                 .permitAll()
                 .anyRequest()
-                .authenticated()
+                .authenticated().and()
+                .httpBasic()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
