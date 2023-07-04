@@ -5,26 +5,23 @@ import VNGroupBy.com.vn.Security.OAuth2.HttpSessionOAuth2AuthorizationRequestRep
 import VNGroupBy.com.vn.Security.OAuth2.OAuth2AuthenticationFailureHandler;
 import VNGroupBy.com.vn.Security.OAuth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebSecurity
 @Configuration
-public class WebSecurityConfig  {
+public class WebSecurityConfig {
     @Autowired
     UserDetailsService userDetailsService;
     @Autowired
@@ -40,19 +37,21 @@ public class WebSecurityConfig  {
     private HttpSessionOAuth2AuthorizationRequestRepository httpSessionOAuth2AuthorizationRequestRepository;
 
     @Bean
-    public JWTAuthenticationFilter jwtAuthenticationFilter(){
-        return  new JWTAuthenticationFilter();
+    public JWTAuthenticationFilter jwtAuthenticationFilter() {
+        return new JWTAuthenticationFilter();
     }
 
     @Bean
     public HttpSessionOAuth2AuthorizationRequestRepository sessionAuthorizationRequestRepository() {
         return new HttpSessionOAuth2AuthorizationRequestRepository();
     }
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         // Password encoder, để Spring Security sử dụng mã hóa mật khẩu người dùng
         return new BCryptPasswordEncoder();
     }
+
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder passwordEncoder, UserDetailsService accountDetailsService)
             throws Exception {
@@ -62,20 +61,16 @@ public class WebSecurityConfig  {
                 .and()
                 .build();
     }
+
+
     @Bean
-    @Order(1)
+    @Order(SecurityProperties.BASIC_AUTH_ORDER - 3)
     public SecurityFilterChain filterChainOAuth2(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .anonymous()
-                .disable()
-
+        http
+                .securityMatcher("/OAuth2/**", "/oauth2/**","/login/oauth2/**")
                 .authorizeHttpRequests()
-                .requestMatchers("/OAuth2/**")
-
-                .authenticated()
                 .anyRequest()
-                .permitAll()
+                .authenticated()
                 .and()
                 .oauth2Login()
 
@@ -94,24 +89,20 @@ public class WebSecurityConfig  {
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler);
 
-
-
-
-    /*    http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);*/
         http.cors();
 
         return http.build();
     }
+
     @Bean
-    @Order(2)
+    @Order(SecurityProperties.BASIC_AUTH_ORDER - 2)
     public SecurityFilterChain filterChainJWT(HttpSecurity http) throws Exception {
         http.csrf()
                 .disable()
                 .anonymous()
                 .disable()
                 .authorizeHttpRequests()
-                /*.requestMatchers("/OAuth2/**").denyAll()*/
-                .requestMatchers("/register/**","/Auth/**")
+                .requestMatchers("/register/**", "/Auth/**","/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated().and()
@@ -120,10 +111,11 @@ public class WebSecurityConfig  {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-            http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.cors();
 
         return http.build();
     }
+
 
 }

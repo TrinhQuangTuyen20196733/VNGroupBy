@@ -6,7 +6,7 @@ services:
     restart: always
     build: .
     ports:
-      - 8080:8080
+      - 8082:8082
     depends_on:
       - vngroupbydb
     environment:
@@ -17,11 +17,11 @@ services:
 
 
   vngroupbydb:
-    container_name: mysqldb
+    container_name: vngroupdb
     image: mysql:8.0
     restart: always
     ports:
-      - 3307:3306
+      - 3308:3306
     environment:
       MYSQL_DATABASE: vngroupby
       MYSQL_ROOT_PASSWORD: root

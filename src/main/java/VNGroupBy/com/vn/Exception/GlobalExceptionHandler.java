@@ -17,4 +17,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(errorResponse);
 
     }
+    @ExceptionHandler({LoginException.class})
+    public ResponseEntity<ErrorResponse> LoginFailException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(403);
+        errorResponse.setDescription(e.getMessage());
+        return ResponseEntity.status(403).body(errorResponse);
+
+    }
 }
