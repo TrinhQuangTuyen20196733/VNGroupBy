@@ -8,6 +8,8 @@ import VNGroupBy.com.vn.Service.Impl.EmailService;
 import VNGroupBy.com.vn.Service.Impl.OTPService;
 import VNGroupBy.com.vn.Service.UserService;
 import VNGroupBy.com.vn.Utils.Caches.MyCache;
+import VNGroupBy.com.vn.Utils.Caches.TextMessage;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,7 @@ public class RegisterController {
     MyCache myCache;
 
     @PostMapping ("/generateOtp")
-    public MessagesResponse generateOTP(@RequestBody RegisterReq registerReq) {
+    public MessagesResponse generateOTP(@RequestBody @Valid RegisterReq registerReq) {
         MessagesResponse ms = new MessagesResponse();
         ms.message="Sent";
         String email = registerReq.getEmail();
@@ -53,7 +55,7 @@ public class RegisterController {
     }
 
     @PostMapping("/validateOtp")
-    public MessagesResponse validateOtp(@RequestBody  ConfirmOTP confirmOTP) {
+    public MessagesResponse validateOtp(@RequestBody @Valid ConfirmOTP confirmOTP) {
 
         final String SUCCESS = "Register Successfully!";
         final String FAIL = "Entered Otp is NOT valid. Please Retry!";
@@ -72,8 +74,15 @@ public class RegisterController {
                     otpService.clearOTP(email);
                     //Save Account
 
-                    UserEntity user = userService.create(registerReq);
-                    myCache.updateCache(email, user);
+                    try {
+                        UserEntity user = userService.create(registerReq);
+                        myCache.updateCache(email, user);
+                    }
+                    catch (Exception e ) {
+                        ms.code=HttpStatus.INTERNAL_SERVER_ERROR.value();
+                        ms.message = TextMessage.CannotRegisterAccount;
+                    }
+
 
                 } else {
 
