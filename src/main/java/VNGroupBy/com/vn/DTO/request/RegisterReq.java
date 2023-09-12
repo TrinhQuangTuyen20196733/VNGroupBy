@@ -13,16 +13,16 @@ import java.util.Date;
 @NoArgsConstructor
 public class RegisterReq {
     @NotBlank
-    private String name;
+    public String name;
     @Email
-    private String email;
+    public String email;
     @NotBlank
-    private String password;
+    public String password;
 
-    private String phoneNumber;
+    public String phoneNumber;
 
-    private String address;
-    private Date birthDay;
-    private String role;
+    public String address;
+    public Date birthDay;
+    public String role;
 
 }

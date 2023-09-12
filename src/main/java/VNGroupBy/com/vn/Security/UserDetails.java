@@ -27,7 +27,9 @@ public class UserDetails implements org.springframework.security.core.userdetail
         authorities.add(new SimpleGrantedAuthority(user.getRole().getCode()));
         return authorities;
     }
-
+public Long  getId(){
+        return  user.getId();
+}
 
 
     @Override

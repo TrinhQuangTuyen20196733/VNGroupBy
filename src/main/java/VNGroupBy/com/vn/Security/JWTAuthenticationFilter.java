@@ -37,10 +37,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
  try {
- var authentication1 = SecurityContextHolder.getContext().getAuthentication();
-  /*  SecurityContextHolder.getContext().setAuthentication(null);*/
-     // Get jwt from request
-   String abc= request.getRequestURI();
+
 
      String jwt = getJwtFromRequest(request);
      if (StringUtils.hasText(jwt) && jwtService.isValidToken(jwt)){

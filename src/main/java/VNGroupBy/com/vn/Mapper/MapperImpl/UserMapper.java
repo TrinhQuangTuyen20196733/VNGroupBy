@@ -38,7 +38,11 @@ public class UserMapper implements Mapper<UserEntity, RegisterReq> {
 
     @Override
     public RegisterReq toDTO(UserEntity entity) {
-        return null;
+        String role = entity.getRole().getCode();
+        ModelMapper modelMapper = new ModelMapper();
+        TypeMap<UserEntity,RegisterReq> typeMap =  modelMapper.createTypeMap(UserEntity.class,RegisterReq.class);
+        typeMap.addMappings(mapping->mapping.map(src->role,RegisterReq::setRole));
+        return modelMapper.map(entity,RegisterReq.class);
     }
 
     @Override

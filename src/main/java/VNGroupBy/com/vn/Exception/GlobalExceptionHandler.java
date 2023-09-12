@@ -25,4 +25,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(errorResponse);
 
     }
+    @ExceptionHandler({InternalServerException.class})
+    public ResponseEntity<ErrorResponse> InternalServerException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(500);
+        errorResponse.setDescription(e.getMessage());
+        return ResponseEntity.status(500).body(errorResponse);
+
+    }
+    @ExceptionHandler({ImageException.class})
+    public ResponseEntity<ErrorResponse> ImageException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(400);
+        errorResponse.setDescription(e.getMessage());
+        return ResponseEntity.status(400).body(errorResponse);
+
+    }
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<ErrorResponse> Exception(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(500);
+        errorResponse.setDescription(e.getMessage());
+        return ResponseEntity.status(500).body(errorResponse);
+
+    }
 }

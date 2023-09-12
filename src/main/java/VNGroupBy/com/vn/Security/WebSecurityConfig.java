@@ -102,7 +102,8 @@ public class WebSecurityConfig {
                 .anonymous()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/register/**", "/Auth/**","/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                .requestMatchers("/register/**", "/Auth/**","/swagger-ui.html", "/swagger-ui/**",
+                        "/v3/api-docs/**","/upload/**","/uploads/**","/add-to-card/**","/topic/**","/api/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated().and()

@@ -2,13 +2,17 @@ package VNGroupBy.com.vn.Security;
 
 
 import VNGroupBy.com.vn.Repository.UserRepository;
+import VNGroupBy.com.vn.Utils.Caches.MyCache;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
     private final UserRepository userRepository;
+
+
 
     public UserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -17,6 +21,7 @@ public class UserDetailsService implements org.springframework.security.core.use
     @Override
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var user = userRepository.findByEmail(email);
+
         if (user==null) {
             throw new UsernameNotFoundException(email);
         }

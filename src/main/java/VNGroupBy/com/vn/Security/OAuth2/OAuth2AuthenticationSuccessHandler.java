@@ -1,12 +1,19 @@
 package VNGroupBy.com.vn.Security.OAuth2;
 
+import VNGroupBy.com.vn.DTO.response.AuthenticationResponse;
+import VNGroupBy.com.vn.Exception.InternalServerException;
 import VNGroupBy.com.vn.Security.JWTService;
+import VNGroupBy.com.vn.Security.UserPrincipal;
+import VNGroupBy.com.vn.Service.RefreshTokenService;
+import VNGroupBy.com.vn.Utils.Encrytion.TokenEncryption;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Component;
@@ -18,6 +25,9 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private JWTService tokenProvider;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
 
     @Autowired
     OAuth2AuthenticationSuccessHandler(JWTService tokenProvider) {
@@ -38,7 +48,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         session.removeAttribute("SPRING_SECURITY_SAVED_REQUEST");
 
-        response.sendRedirect(targetUrl);
+            response.sendRedirect(targetUrl);
+
+
     }
 
 

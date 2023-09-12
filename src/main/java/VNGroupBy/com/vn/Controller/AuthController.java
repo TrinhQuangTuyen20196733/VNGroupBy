@@ -7,6 +7,7 @@ import VNGroupBy.com.vn.Entity.RefreshToken;
 import VNGroupBy.com.vn.Entity.UserEntity;
 import VNGroupBy.com.vn.Exception.LoginException;
 import VNGroupBy.com.vn.Exception.TokenInValid;
+import VNGroupBy.com.vn.Repository.UserRepository;
 import VNGroupBy.com.vn.Security.JWTService;
 import VNGroupBy.com.vn.Security.UserDetails;
 import VNGroupBy.com.vn.Security.UserPrincipal;
@@ -33,6 +34,8 @@ public class AuthController {
     RefreshTokenService refreshTokenService;
     @Autowired
     JWTService jwtService;
+    @Autowired
+    UserRepository userRepository;
 
     @PostMapping("/login")
     public AuthenticationResponse Login(@RequestBody @Valid LoginRequest loginRequest) {
@@ -47,7 +50,8 @@ public class AuthController {
             var userID = userPrincipal.getUser().getId();
             String accessToken = tokenProvider.generateToken(userID);
             String refreshToken =refreshTokenService.create(userID).getToken();
-            return new AuthenticationResponse(accessToken,refreshToken);
+            String role = userRepository.findById(userID).get().getRole().getCode();
+            return new AuthenticationResponse(accessToken,refreshToken,role);
         }
         catch (Exception e) {
             throw  new LoginException("Login Fail! Please, try again!");
@@ -67,7 +71,7 @@ public class AuthController {
                 .map(UserEntity::getId)
                 .map(jwtService::generateToken)
                 .orElseThrow(() -> new TokenInValid("Access token generation failed"));
-        return new AuthenticationResponse(token, refresh_token);
+        return new AuthenticationResponse(token, refresh_token,null);
 
 
     }

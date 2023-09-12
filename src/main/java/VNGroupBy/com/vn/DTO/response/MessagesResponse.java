@@ -2,6 +2,8 @@ package VNGroupBy.com.vn.DTO.response;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 @Data
@@ -15,4 +17,6 @@ public class MessagesResponse {
         code=200;
         message="Successfully";
     }
+
+
 }
