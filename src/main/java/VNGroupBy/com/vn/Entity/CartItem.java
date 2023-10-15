@@ -21,14 +21,7 @@ public class CartItem extends BaseEntity {
     })
     @JoinColumn(name = "shopping_cart_id")
     private ShoppingCart shoppingCart;
-    /*   @ManyToOne(fetch = FetchType.EAGER, cascade = {
-               CascadeType.DETACH,
-               CascadeType.MERGE,
-               CascadeType.REFRESH,
-               CascadeType.PERSIST,
-       })
-       @JoinColumn(name = "buy_type_id")
-       private BuyType buyType;*/
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Product product;

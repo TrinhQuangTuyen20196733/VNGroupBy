@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/shops")
 public class ShopController {
-    @Autowired
-    private ShopService shopService;
+    private final ShopService shopService;
+
+    public ShopController(ShopService shopService) {
+        this.shopService = shopService;
+    }
+
     @PostMapping()
     MessagesResponse  createShop(@RequestBody Shop shop){
   return   shopService.save(shop);
