@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 	info = @Info(
 			title = "VN GroupBy API",
 			version = "1.0.0",
-			description = "Building VN GroupBy e-commerce platform",
+			description = "Building VN GroupBy e-commerce platform kkk",
 			contact = @Contact(
 					name = "Trịnh Quang Tuyến",
 					email = "tuyen.tq196733@sis.hust.edu.vn"
